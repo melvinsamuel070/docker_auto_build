@@ -12,7 +12,8 @@ inputs:
     default: '4587'
 
 runs:
-  using: composite
-  main: entrypoint.sh
-
-  
+  using: 'composite'
+  steps:
+    - name: Run entrypoint script
+      run: ./entrypoint.sh
+      shell: bash
