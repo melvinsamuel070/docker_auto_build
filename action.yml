@@ -1,0 +1,18 @@
+name: 'Dockerfile Creator Action'
+description: 'Creates and manages Docker containers for an Nginx-based application'
+author: 'MelvinSamuel070'
+branding:
+  icon: 'package'  
+  color: 'blue'
+
+inputs:
+  port:
+    description: 'Port for the container'
+    required: false
+    default: '4587'
+
+runs:
+  using: composite
+  main: entrypoint.sh
+
+  

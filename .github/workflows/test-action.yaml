@@ -1,0 +1,29 @@
+name: Test Dockerfile Creator Action
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run Dockerfile Creator Action
+        uses: ./  # Points to your local action
+        with:
+          port: 4587
+
+      - name: Test HTTP Response
+        run: |
+          sleep 10
+            curl -sI http://localhost:4587 | grep "200 OK"; then
+            echo "✅ Container is running successfully!"
+            echo "❌ Container did not respond as expected."
+    
