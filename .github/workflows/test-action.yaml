@@ -26,7 +26,4 @@ jobs:
       - name: Test HTTP Response
         run: |
         
-            curl -sI http://localhost:4587 | grep "200 OK"; 
-            echo "✅ Container is running successfully!"
-            echo "❌ Container did not respond as expected."
-    
+          curl -sI http://localhost:4587 | grep "200 OK" && echo "✅ Container is running successfully!" || (echo "❌ Container did not respond as expected." && exit 1)
