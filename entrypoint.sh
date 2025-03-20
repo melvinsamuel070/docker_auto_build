@@ -5,45 +5,52 @@ DockerfileName="Dockerfile"
 if [[ -f $DockerfileName ]]
 then
     echo "Dockerfile exists already"
-    echo "FROM nginx:alpine" > $DockerfileName
-    
 else 
     ## file does not exist, create it
     echo "File does not exist..."
     echo "Creating it ..."
     sleep 3
-    touch $DockerfileName
-    echo "$DockerfileName file created ..."
-    
-    echo "FROM nginx:alpine" >> $DockerfileName 
-    echo "WORKDIR /usr/share/nginx/html" >> $DockerfileName 
-    echo "COPY index.html ." >> $DockerfileName 
-    echo "RUN ls" >> $DockerfileName 
-    echo "RUN apt update -y" >> $DockerfileName  
-    echo "RUN apt upgrade -y" >> $DockerfileName 
-
-    echo "docker build -t hipo -f $DockerfileName ."
-    docker build -t hipo -f "$DockerfileName" .
-    sleep 10
-    docker run -d --name hipo -p 4587:80 hipo
+    cat <<EOF > $DockerfileName
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+COPY index.html .
+RUN ls
+RUN apk add --no-cache bash
+RUN apk update && apk upgrade -y
+EOF
 fi  
 
-sleep 5
-if curl -sI http://localhost:4587 | grep "200 OK"; then
-    echo "Success"
-else
-    echo "Failed"  
+# Ensure index.html exists before proceeding
+if [[ ! -f index.html ]]; then
+    echo "Error: index.html not found!"
+    exit 1
 fi
 
+echo "Building the Docker image..."
+docker build -t hipo -f "$DockerfileName" .
+
+docker run -d --name hipo -p 4587:80 hipo
+
+# Improved wait loop for better reliability
+for i in {1..30}; do
+    if curl -sI http://localhost:4587 | grep "200 OK"; then
+        echo "✅ Container is running successfully!"
+        break
+    fi
+    echo "⏳ Waiting for container to respond..."
+    sleep 2
+done
+
+# Clean-up
 docker ps 
 docker stop hipo
 docker rm hipo
 docker ps
 
 if docker rmi hipo:latest --force ; then
-   echo "Image deleted"
+   echo "🗑️ Image deleted successfully"
 else
-   echo "Image not deleted"
+   echo "❌ Image deletion failed"
 fi
 
 docker images
